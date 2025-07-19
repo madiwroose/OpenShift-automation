@@ -1,38 +1,47 @@
-name: Deploy OpenShift Cluster
+name: OpenShift Cluster Deployment
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: OpenShift AWS Deployment
+  deploy-openshift:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Install OpenShift Installer
+        run: |
+          curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz
+          tar -xzf openshift-install-linux.tar.gz
+          chmod +x openshift-install
+          sudo mv openshift-install /usr/local/bin/
 
-    - name: Install OpenShift Installer
-      run: |
-        curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz -o installer.tar.gz
-        tar -xzf installer.tar.gz
-        chmod +x openshift-install
-        sudo mv openshift-install /usr/local/bin/
+      - name: Create OpenShift cluster directory
+        run: mkdir -p openshift-cluster
 
-    - name: Add pull secret and SSH key
-      run: |
-        echo '${{ secrets.PULL_SECRET }}' > ./openshift-cluster/pull-secret.txt
-        echo '${{ secrets.SSH_PRIVATE_KEY }}' > ./openshift-cluster/ssh-key
-        chmod 600 ./openshift-cluster/ssh-key
+      - name: Generate install-config.yaml
+        run: |
+          cat > openshift-cluster/install-config.yaml <<EOF
+apiVersion: v1
+baseDomain: example.com
+metadata:
+  name: mycluster
+platform:
+  aws:
+    region: us-east-1
+pullSecret: '${{ secrets.OPENSHIFT_PULL_SECRET }}'
+sshKey: '${{ secrets.OPENSHIFT_SSH_KEY }}'
+EOF
 
-    - name: Run OpenShift Installer
-      run: |
-        cd openshift-cluster
-        openshift-install create cluster --dir=. --log-level=info
+      - name: Run OpenShift Installer
+        run: |
+          cd openshift-cluster
+          openshift-install create cluster --dir=. --log-level=info
