@@ -12,8 +12,8 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      PULL_SECRET: ${{ secrets.OPENSHIFT_PULL_SECRET }}
-      SSH_KEY: ${{ secrets.OPENSHIFT_SSH_KEY }}
+      OPENSHIFT_PULL_SECRET: ${{ secrets.OPENSHIFT_PULL_SECRET }}
+      OPENSHIFT_SSH_KEY: ${{ secrets.OPENSHIFT_SSH_KEY }}
 
     steps:
       - name: Checkout repository
@@ -29,19 +29,17 @@ jobs:
       - name: Create cluster directory
         run: mkdir -p openshift-cluster
 
-      - name: Generate install-config.yaml
+      - name: Create install-config.yaml
         run: |
-          cat <<EOF > openshift-cluster/install-config.yaml
-apiVersion: v1
-baseDomain: example.com
-metadata:
-  name: mycluster
-platform:
-  aws:
-    region: us-east-1
-pullSecret: "${PULL_SECRET}"
-sshKey: "${SSH_KEY}"
-EOF
+          echo "apiVersion: v1" > openshift-cluster/install-config.yaml
+          echo "baseDomain: example.com" >> openshift-cluster/install-config.yaml
+          echo "metadata:" >> openshift-cluster/install-config.yaml
+          echo "  name: mycluster" >> openshift-cluster/install-config.yaml
+          echo "platform:" >> openshift-cluster/install-config.yaml
+          echo "  aws:" >> openshift-cluster/install-config.yaml
+          echo "    region: us-east-1" >> openshift-cluster/install-config.yaml
+          echo "pullSecret: '${OPENSHIFT_PULL_SECRET}'" >> openshift-cluster/install-config.yaml
+          echo "sshKey: '${OPENSHIFT_SSH_KEY}'" >> openshift-cluster/install-config.yaml
 
       - name: Run OpenShift Installer
         run: |
