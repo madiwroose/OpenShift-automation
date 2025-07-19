@@ -17,7 +17,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1  # Change if you're using a different region
+        aws-region: us-east-1
 
     - name: Install OpenShift Installer
       run: |
@@ -25,12 +25,6 @@ jobs:
         tar -xzf installer.tar.gz
         chmod +x openshift-install
         sudo mv openshift-install /usr/local/bin/
-
-    - name: Create working directory
-      run: mkdir -p ./openshift-cluster
-
-    - name: Copy install-config
-      run: cp ./install-config.yaml ./openshift-cluster/
 
     - name: Add pull secret and SSH key
       run: |
