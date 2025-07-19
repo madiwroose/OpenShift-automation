@@ -30,7 +30,7 @@ jobs:
       run: mkdir -p ./openshift-cluster
 
     - name: Copy install-config
-      run: cp install-config.yaml ./openshift-cluster/
+      run: cp ./install-config.yaml ./openshift-cluster/
 
     - name: Add pull secret and SSH key
       run: |
