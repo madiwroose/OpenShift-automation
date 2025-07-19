@@ -16,7 +16,7 @@ jobs:
       SSH_KEY: ${{ secrets.OPENSHIFT_SSH_KEY }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install OpenShift Installer
@@ -29,7 +29,7 @@ jobs:
       - name: Create cluster directory
         run: mkdir -p openshift-cluster
 
-      - name: Generate install-config.yaml from template
+      - name: Generate install-config.yaml
         run: |
           cat <<EOF > openshift-cluster/install-config.yaml
 apiVersion: v1
@@ -39,8 +39,8 @@ metadata:
 platform:
   aws:
     region: us-east-1
-pullSecret: "$PULL_SECRET"
-sshKey: "$SSH_KEY"
+pullSecret: "${PULL_SECRET}"
+sshKey: "${SSH_KEY}"
 EOF
 
       - name: Run OpenShift Installer
