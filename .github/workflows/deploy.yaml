@@ -27,12 +27,14 @@ jobs:
       - name: Create OpenShift cluster directory
         run: mkdir -p openshift-cluster
 
-      - name: Generate install-config.yaml
+      - name: Write secrets to temp files
         run: |
           echo "${{ secrets.OPENSHIFT_PULL_SECRET }}" > pull-secret.txt
           echo "${{ secrets.OPENSHIFT_SSH_KEY }}" > ssh-key.txt
 
-          cat <<EOF > openshift-cluster/install-config.yaml
+      - name: Generate install-config.yaml
+        run: |
+          cat > openshift-cluster/install-config.yaml <<EOF
 apiVersion: v1
 baseDomain: example.com
 metadata:
