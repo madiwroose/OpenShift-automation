@@ -1,0 +1,9 @@
+apiVersion: v1
+baseDomain: example.com
+metadata:
+  name: test-case
+platform:
+  aws:
+    region: us-east-1
+pullSecret: '${{ secrets.OPENSHIFT_PULL_SECRET }}'
+sshKey: '${{ secrets.OPENSHIFT_SSH_KEY }}'
