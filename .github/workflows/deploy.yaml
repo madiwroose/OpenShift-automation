@@ -12,9 +12,11 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      PULL_SECRET: ${{ secrets.OPENSHIFT_PULL_SECRET }}
+      SSH_KEY: ${{ secrets.OPENSHIFT_SSH_KEY }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install OpenShift Installer
@@ -24,17 +26,12 @@ jobs:
           chmod +x openshift-install
           sudo mv openshift-install /usr/local/bin/
 
-      - name: Create OpenShift cluster directory
+      - name: Create cluster directory
         run: mkdir -p openshift-cluster
 
-      - name: Write secrets to temp files
+      - name: Generate install-config.yaml from template
         run: |
-          echo "${{ secrets.OPENSHIFT_PULL_SECRET }}" > pull-secret.txt
-          echo "${{ secrets.OPENSHIFT_SSH_KEY }}" > ssh-key.txt
-
-      - name: Generate install-config.yaml
-        run: |
-          cat > openshift-cluster/install-config.yaml <<EOF
+          cat <<EOF > openshift-cluster/install-config.yaml
 apiVersion: v1
 baseDomain: example.com
 metadata:
@@ -42,8 +39,8 @@ metadata:
 platform:
   aws:
     region: us-east-1
-pullSecret: '$(cat pull-secret.txt)'
-sshKey: '$(cat ssh-key.txt)'
+pullSecret: "$PULL_SECRET"
+sshKey: "$SSH_KEY"
 EOF
 
       - name: Run OpenShift Installer
