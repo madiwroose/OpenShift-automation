@@ -1,0 +1,32 @@
+name: Deploy OpenShift Cluster
+
+on:
+  workflow_dispatch:
+
+jobs:
+  openshift-install:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Setup AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Download OpenShift Installer
+      run: |
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz
+        tar -xvzf openshift-install-linux.tar.gz
+        sudo mv openshift-install /usr/local/bin/
+
+    - name: Create cluster
+      run: |
+        mkdir -p $HOME/openshift-cluster
+        cp install-config.yaml $HOME/openshift-cluster/
+        cd $HOME/openshift-cluster
+        openshift-install create cluster --dir=$HOME/openshift-cluster --log-level=info
