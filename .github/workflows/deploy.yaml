@@ -29,7 +29,10 @@ jobs:
 
       - name: Generate install-config.yaml
         run: |
-          cat > openshift-cluster/install-config.yaml <<EOF
+          echo "${{ secrets.OPENSHIFT_PULL_SECRET }}" > pull-secret.txt
+          echo "${{ secrets.OPENSHIFT_SSH_KEY }}" > ssh-key.txt
+
+          cat <<EOF > openshift-cluster/install-config.yaml
 apiVersion: v1
 baseDomain: example.com
 metadata:
@@ -37,8 +40,8 @@ metadata:
 platform:
   aws:
     region: us-east-1
-pullSecret: '${{ secrets.OPENSHIFT_PULL_SECRET }}'
-sshKey: '${{ secrets.OPENSHIFT_SSH_KEY }}'
+pullSecret: '$(cat pull-secret.txt)'
+sshKey: '$(cat ssh-key.txt)'
 EOF
 
       - name: Run OpenShift Installer
